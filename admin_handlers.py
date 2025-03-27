@@ -11,26 +11,21 @@ router = Router()
 
 @router.message(Command("admin"))
 async def admin_panel(message: types.Message):
-    """Меню администратора."""
-    if message.from_user.id != ADMIN_ID:
-        await message.answer("❌ У вас нет прав для просмотра админ-панели.")
-        return
-    
+    # Пример корректной клавиатуры
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton("📊 Список пользователей", callback_data="admin_users_list")],
         [InlineKeyboardButton("↩️ Закрыть", callback_data="admin_close")]
     ])
+    
     await message.answer("Добро пожаловать в админ-панель!", reply_markup=kb)
-
+    
 @router.callback_query(lambda c: c.data == "admin_close")
 async def admin_close(callback: CallbackQuery):
-    """Закрываем меню админа."""
     await callback.message.delete()
     await callback.answer()
 
 @router.callback_query(lambda c: c.data == "admin_users_list")
 async def admin_users_list(callback: CallbackQuery):
-    """Показываем список всех пользователей."""
     if callback.from_user.id != ADMIN_ID:
         await callback.answer("Нет доступа!", show_alert=True)
         return
