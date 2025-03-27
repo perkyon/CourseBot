@@ -1,13 +1,13 @@
 # database.py
+
 import sqlite3
 from config import DB_PATH
 
 def init_db():
-    """Создаёт нужные таблицы, если их нет."""
+    """Создаёт таблицы, если ещё не созданы."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Основная таблица пользователей
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +20,7 @@ def init_db():
         )
     ''')
 
-    # Таблица для хранения сообщений, если нужна поддержка
+    # Таблица для хранения сообщений от пользователей (если нужна)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,20 +34,22 @@ def init_db():
     conn.close()
 
 def get_all_users():
-    """
-    Возвращает список кортежей (id, tg_id, name, email, phone, course, paid)
-    для всех пользователей в таблице users.
-    """
+    """Возвращает список кортежей (id, tg_id, name, email, phone, course, paid)."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    rows = cursor.execute("SELECT id, tg_id, name, email, phone, course, paid FROM users").fetchall()
+    rows = cursor.execute(
+        "SELECT id, tg_id, name, email, phone, course, paid FROM users"
+    ).fetchall()
     conn.close()
     return rows
 
 def insert_user_message(user_tg_id, text):
-    """Сохраняет входящее сообщение пользователя (для поддержки)."""
+    """Сохраняет входящее сообщение в таблицу messages."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (user_tg_id, message_text) VALUES (?, ?)", (user_tg_id, text))
+    cursor.execute(
+        "INSERT INTO messages (user_tg_id, message_text) VALUES (?, ?)",
+        (user_tg_id, text)
+    )
     conn.commit()
     conn.close()
